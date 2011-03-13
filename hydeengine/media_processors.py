@@ -64,6 +64,29 @@ class SASS:
         resource.source_file.delete()
         resource.source_file = out_file
 
+class Compass:
+    @staticmethod
+    def process(resource):
+        out_file = File(resource.source_file.path_without_extension + ".css")
+        load_path = os.path.dirname(resource.file.path)
+        out_path = os.path.dirname(out_file.path)
+        compass = settings.COMPASS_PATH
+        if not compass or not os.path.exists(compass):
+            raise ValueError("Compass cannot be found at [%s]" % compass)
+        try:
+            args = [compass, 'compile',
+                    '--sass-dir', load_path,
+                    '--css-dir', out_path,
+                    '-s', 'compressed',
+                    resource.file.path]
+            check_call(args)
+        except CalledProcessError, e:
+            print 'Syntax Error when calling Compass Processor:', e
+            return None
+        resource.source_file.delete()
+        resource.source_file = out_file
+
+
 class LessCSS:
     @staticmethod
     def process(resource):
